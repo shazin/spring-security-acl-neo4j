@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
 @Transactional(readOnly=true)
 public class Neo4jMutableAclService extends Neo4jAclService implements MutableAclService {
 
+	//private String insertObjectIdentity = "MATCH (class:ClassNode), (sid:SidNode) WHERE class.className = {className} AND sid.sid = {sid} AND sid.principal = {principal} CREATE (acl:AclNode {objectIdIdentity: {objectIdIdentity}, entriesInheriting: {entriesInheriting}), (acl)-[:SECURES]->(class), (acl)-[:OWNED_BY]"
 	private String selectObjectIdentity = "MATCH (class:ClassNode)<-[:SECURES]-(acl:AclNode) WHERE acl.objectIdIdentity = {objectIdIdentity} and class.className = {className} RETURN acl";
 	private String selectSid = "MATCH (sid:SidNode) WHERE sid.sid = {sid} AND sid.principal = {principal} RETURN sid";
 	private String selectClass = "MATCH (class:ClassNode) WHERE class.className = {className} RETURN class";

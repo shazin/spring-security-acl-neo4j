@@ -2,8 +2,6 @@ package org.springframework.security.acls.neo4j.config;
 
 import javax.sql.DataSource;
 
-import net.sf.ehcache.store.AuthoritativeTier;
-
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -22,8 +20,6 @@ import org.springframework.security.acls.domain.DefaultPermissionFactory;
 import org.springframework.security.acls.domain.DefaultPermissionGrantingStrategy;
 import org.springframework.security.acls.domain.EhCacheBasedAclCache;
 import org.springframework.security.acls.domain.PermissionFactory;
-import org.springframework.security.acls.jdbc.BasicLookupStrategy;
-import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.PermissionGrantingStrategy;

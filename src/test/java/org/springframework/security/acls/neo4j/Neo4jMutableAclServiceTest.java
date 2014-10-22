@@ -3,8 +3,10 @@ package org.springframework.security.acls.neo4j;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(classes={AppTestConfig.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional(readOnly=true)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Neo4jMutableAclServiceTest {
 
 	@Autowired

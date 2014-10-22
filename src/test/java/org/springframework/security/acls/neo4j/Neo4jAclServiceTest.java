@@ -3,7 +3,9 @@ package org.springframework.security.acls.neo4j;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.FixMethodOrder;
@@ -92,16 +94,74 @@ public class Neo4jAclServiceTest {
 			
 			mutableAclService.updateAcl(acl);
 		}
-		
+				
+		List<ObjectIdentity> oids = new ArrayList<ObjectIdentity>();
+		for(int i=1;i<=100;i++) {
+			if(i%2 == 0) {
+				oids.add(new ObjectIdentityImpl(String.format("com.test.Shazin%d", i), Long.valueOf(i)));
+			}
+		}
 		long start = System.nanoTime();		
-		Map<ObjectIdentity, Acl> objects = mutableAclService.readAclsById(Arrays.<ObjectIdentity>asList(new ObjectIdentityImpl("com.test.Shazin99", 99l), new ObjectIdentityImpl("com.test.Shazin98", 98l)));
+		Map<ObjectIdentity, Acl> objects = mutableAclService.readAclsById(oids);
 		long end = System.nanoTime();
 		
-		assertEquals(2, objects.size());
+		System.out.println("Reading "+oids.size()+" objects in "+(end - start));
+		
+		assertEquals(50, objects.size());
 		for(Map.Entry<ObjectIdentity, Acl> entry:objects.entrySet()) {
 			assertEquals(2, entry.getValue().getEntries().size());
 		}
 	}
+		
+	@Test
+	@Rollback(false)
+	@Transactional(rollbackFor=Exception.class)
+	public void test3readAclsById() {
+		Authentication auth = new TestingAuthenticationToken("shazin", "N/A");
+		auth.setAuthenticated(true);
+		SecurityContextHolder.getContext().setAuthentication(auth);
+		
+		List<Sid> sids = Arrays.<Sid>asList(new PrincipalSid("USER_0"), new GrantedAuthoritySid("ROLE_1"));
+				
+		List<ObjectIdentity> oids = new ArrayList<ObjectIdentity>();
+		for(int i=1;i<=100;i++) {
+			if(i%2 == 1) {
+				oids.add(new ObjectIdentityImpl(String.format("com.test.Shazin%d", i), Long.valueOf(i)));
+			}
+		}
+		long start = System.nanoTime();		
+		Map<ObjectIdentity, Acl> objects = mutableAclService.readAclsById(oids, sids);
+		long end = System.nanoTime();
+		
+		System.out.println("Reading "+oids.size()+" objects in "+(end - start));
+		
+		assertEquals(50, objects.size());
+		for(Map.Entry<ObjectIdentity, Acl> entry:objects.entrySet()) {
+			assertEquals(2, entry.getValue().getEntries().size());
+		}
+	}
+	
+	@Test
+	@Rollback(false)
+	@Transactional(rollbackFor=Exception.class)
+	public void test4readAclById() {
+		Authentication auth = new TestingAuthenticationToken("shazin", "N/A");
+		auth.setAuthenticated(true);
+		SecurityContextHolder.getContext().setAuthentication(auth);
+		
+		List<Sid> sids = Arrays.<Sid>asList(new PrincipalSid("USER_0"), new GrantedAuthoritySid("ROLE_1"));
+				
+
+		long start = System.nanoTime();		
+		Acl acl = mutableAclService.readAclById(new ObjectIdentityImpl("com.test.Shazin1", 1l), sids);
+		long end = System.nanoTime();
+		
+		System.out.println("Reading 1 objects in "+(end - start));
+		
+		assertNotNull(acl);
+		assertEquals(2, acl.getEntries().size());
+	}
+	
 
 	
 }
