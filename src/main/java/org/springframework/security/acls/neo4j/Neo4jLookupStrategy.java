@@ -513,4 +513,88 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		}
 	}
 
+	public PermissionFactory getPermissionFactory() {
+		return permissionFactory;
+	}
+
+	public void setPermissionFactory(PermissionFactory permissionFactory) {
+		this.permissionFactory = permissionFactory;
+	}
+
+	public PermissionGrantingStrategy getPermissionGrantingStrategy() {
+		return permissionGrantingStrategy;
+	}
+
+	public void setPermissionGrantingStrategy(
+			PermissionGrantingStrategy permissionGrantingStrategy) {
+		this.permissionGrantingStrategy = permissionGrantingStrategy;
+	}
+
+	public Neo4jTemplate getNeo4jTemplate() {
+		return neo4jTemplate;
+	}
+
+	public void setNeo4jTemplate(Neo4jTemplate neo4jTemplate) {
+		this.neo4jTemplate = neo4jTemplate;
+	}
+
+	public int getBatchSize() {
+		return batchSize;
+	}
+
+	public void setBatchSize(int batchSize) {
+		this.batchSize = batchSize;
+	}
+
+	public String getLookupObjectIdentitiesWhereClause() {
+		return lookupObjectIdentitiesWhereClause;
+	}
+
+	public void setLookupObjectIdentitiesWhereClause(
+			String lookupObjectIdentitiesWhereClause) {
+		this.lookupObjectIdentitiesWhereClause = lookupObjectIdentitiesWhereClause;
+	}
+
+	public String getDefaultWhereClause() {
+		return defaultWhereClause;
+	}
+
+	public void setDefaultWhereClause(String defaultWhereClause) {
+		this.defaultWhereClause = defaultWhereClause;
+	}
+
+	public String getMatchClause() {
+		return matchClause;
+	}
+
+	public void setMatchClause(String matchClause) {
+		this.matchClause = matchClause;
+	}
+
+	public String getOrderByClause() {
+		return orderByClause;
+	}
+
+	public void setOrderByClause(String orderByClause) {
+		this.orderByClause = orderByClause;
+	}
+
+	public String getReturnClause() {
+		return returnClause;
+	}
+
+	public void setReturnClause(String returnClause) {
+		this.returnClause = returnClause;
+	}
+
+	public AclCache getAclCache() {
+		return aclCache;
+	}
+
+	public AclAuthorizationStrategy getAclAuthorizationStrategy() {
+		return aclAuthorizationStrategy;
+	}
+	
+	
+
 }

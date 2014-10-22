@@ -148,13 +148,13 @@ public class Neo4jMutableAclService extends Neo4jAclService implements MutableAc
 	
 	protected void createObjectIdentity(ObjectIdentity object, Sid owner) {
 		Assert.isTrue(TransactionSynchronizationManager.isSynchronizationActive(), "Transaction must be running");
-        SidNode sid = createOrRetrieveSidPrimaryKey(owner, true);
-        ClassNode classNode = createOrRetrieveClassPrimaryKey(object.getType(), true);
+        SidNode sid = createOrRetrieveSid(owner, true);
+        ClassNode classNode = createOrRetrieveClass(object.getType(), true);
         AclNode aclNode = new AclNode(Boolean.TRUE, (Long) object.getIdentifier(), null, classNode, sid);
         AclNode savedAcl = neo4jTemplate.save(aclNode);
     }
 	
-	protected SidNode createOrRetrieveSidPrimaryKey(Sid sid, boolean allowCreate) {
+	protected SidNode createOrRetrieveSid(Sid sid, boolean allowCreate) {
         Assert.notNull(sid, "Sid required");
 
         String sidName;
@@ -188,7 +188,7 @@ public class Neo4jMutableAclService extends Neo4jAclService implements MutableAc
         return null;
     }
 	
-	protected ClassNode createOrRetrieveClassPrimaryKey(String type, boolean allowCreate) {
+	protected ClassNode createOrRetrieveClass(String type, boolean allowCreate) {
 		Map<String, Object> params = new HashMap<String, Object>();
         params.put("className", type);
         Result<Map<String, Object>> result = neo4jTemplate.query(selectClass, params);
@@ -231,7 +231,7 @@ public class Neo4jMutableAclService extends Neo4jAclService implements MutableAc
     	int i = aclNode.getAces().size();
     	for(AccessControlEntry ace:acl.getEntries()) {
     		AccessControlEntryImpl entry = (AccessControlEntryImpl) ace;
-    		aces.add(neo4jTemplate.save(new AceNode(createOrRetrieveSidPrimaryKey(entry.getSid(), true), i, entry.getPermission().getMask(), entry.isGranting(), entry.isAuditSuccess(), entry.isAuditFailure())));
+    		aces.add(neo4jTemplate.save(new AceNode(createOrRetrieveSid(entry.getSid(), true), i, entry.getPermission().getMask(), entry.isGranting(), entry.isAuditSuccess(), entry.isAuditFailure())));
     				i++;
     	}
     	aclNode.setAces(aces);
@@ -251,7 +251,7 @@ public class Neo4jMutableAclService extends Neo4jAclService implements MutableAc
 
         Assert.notNull(acl.getOwner(), "Owner is required in this implementation");
 
-        SidNode ownerSid = createOrRetrieveSidPrimaryKey(acl.getOwner(), true);
+        SidNode ownerSid = createOrRetrieveSid(acl.getOwner(), true);
         AclNode aclNode = retrieveAclNode(acl.getObjectIdentity());
     	
     	if (aclNode == null) {
@@ -275,6 +275,50 @@ public class Neo4jMutableAclService extends Neo4jAclService implements MutableAc
         }
         aclCache.evictFromCache(objectIdentity);
     }
+
+	public String getSelectObjectIdentity() {
+		return selectObjectIdentity;
+	}
+
+	public void setSelectObjectIdentity(String selectObjectIdentity) {
+		this.selectObjectIdentity = selectObjectIdentity;
+	}
+
+	public String getSelectSid() {
+		return selectSid;
+	}
+
+	public void setSelectSid(String selectSid) {
+		this.selectSid = selectSid;
+	}
+
+	public String getSelectClass() {
+		return selectClass;
+	}
+
+	public void setSelectClass(String selectClass) {
+		this.selectClass = selectClass;
+	}
+
+	public String getDeleteEntryByObjectIdentityForeignKey() {
+		return deleteEntryByObjectIdentityForeignKey;
+	}
+
+	public void setDeleteEntryByObjectIdentityForeignKey(
+			String deleteEntryByObjectIdentityForeignKey) {
+		this.deleteEntryByObjectIdentityForeignKey = deleteEntryByObjectIdentityForeignKey;
+	}
+
+	public String getDeleteObjectIdentityByPrimaryKey() {
+		return deleteObjectIdentityByPrimaryKey;
+	}
+
+	public void setDeleteObjectIdentityByPrimaryKey(
+			String deleteObjectIdentityByPrimaryKey) {
+		this.deleteObjectIdentityByPrimaryKey = deleteObjectIdentityByPrimaryKey;
+	}
+    
+    
 
 
 }

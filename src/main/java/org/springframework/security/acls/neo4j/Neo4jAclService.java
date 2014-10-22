@@ -92,4 +92,38 @@ public class Neo4jAclService implements AclService {
 		return readAclsById(objects, null);
 	}
 
+	public LookupStrategy getLookupStrategy() {
+		return lookupStrategy;
+	}
+
+	public void setLookupStrategy(LookupStrategy lookupStrategy) {
+		this.lookupStrategy = lookupStrategy;
+	}
+
+	public AclCache getAclCache() {
+		return aclCache;
+	}
+
+	public void setAclCache(AclCache aclCache) {
+		this.aclCache = aclCache;
+	}
+
+	public Neo4jTemplate getNeo4jTemplate() {
+		return neo4jTemplate;
+	}
+
+	public void setNeo4jTemplate(Neo4jTemplate neo4jTemplate) {
+		this.neo4jTemplate = neo4jTemplate;
+	}
+
+	public String getFindChildrenSql() {
+		return findChildrenSql;
+	}
+
+	public void setFindChildrenSql(String findChildrenSql) {
+		this.findChildrenSql = findChildrenSql;
+	}
+	
+	
+
 }
