@@ -18,7 +18,9 @@ acl_sid, acl_class, acl_object_identity and acl_entry are modelled represpective
 Testing
 -------
 
-Testing against H2 Database and Inmemory Neo4j Test Database yielded following result for 200 ACL Entries (2 for each Object Identity), 3 Sids (Including logged in User Sid), 100 Classes and 100 Object Identities.
+Testing against H2 Database and Inmemory Neo4j Test Database with dataset 200 ACL Entries (2 for each Object Identity), 3 Sids (Including logged in User Sid), 100 Classes and 100 Object Identities. 
+
+Testing was mainly focused on Retrieval and to retrieve 50 non following Object Identities with ACL Entries (2 for each Object Identity) while running four random times with an Empty Cache, following were the results.
 
 ![alt tag](https://raw.github.com/shazin/spring-security-acl-neo4j/master/Chart.jpg)
 
