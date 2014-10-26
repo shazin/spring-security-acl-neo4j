@@ -12,11 +12,12 @@ public class ClassNode extends BaseNode {
 
 	@GraphId
 	private Long graphId;
-	
-	@Indexed(indexName="class_name", indexType=IndexType.FULLTEXT)
+
+	@Indexed(indexName = "class_name", indexType = IndexType.FULLTEXT)
 	private String className;
-	
-	public ClassNode() {}	
+
+	public ClassNode() {
+	}
 
 	public ClassNode(String className) {
 		this();
@@ -38,30 +39,31 @@ public class ClassNode extends BaseNode {
 	public void setClassName(String className) {
 		this.className = className;
 	}
-	
+
 	public boolean equals(Object o) {
-		if(o == null) {
+		if (o == null) {
 			return false;
 		}
-		
-		if(o == this) {
+
+		if (o == this) {
 			return true;
 		}
-		
-		if(o instanceof ClassNode) {
+
+		if (o instanceof ClassNode) {
 			ClassNode other = (ClassNode) o;
 			return getClassName().equals(other.getClassName());
 		}
-		
+
 		return false;
 	}
-	
+
 	public int hashCode() {
 		return Objects.hash(getClassName());
 	}
-	
+
 	public String toString() {
-		return "ClassNode[id="+getId()+", className="+getClassName()+"]";
+		return "ClassNode[id=" + getId() + ", className=" + getClassName()
+				+ "]";
 	}
-	
+
 }

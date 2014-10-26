@@ -102,7 +102,7 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 			}
 
 			// Check cache for the present ACL entry
-			if (!aclFound) {				
+			if (!aclFound) {
 				Acl acl = aclCache.getFromCache(oid);
 
 				// Ensure any cached element supports all the requested SIDs
@@ -184,11 +184,11 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		Map<String, Object> params = new HashMap<String, Object>();
 		int index = 1;
 		for (ObjectIdentity oid : objectIdentities) {
-			params.put(String.format("objectIdIdentity%d", index), (Long) oid
-					.getIdentifier());
+			params.put(String.format("objectIdIdentity%d", index),
+					(Long) oid.getIdentifier());
 			params.put(String.format("className%d", index++), oid.getType());
 		}
-		
+
 		Result<Map<String, Object>> queryResult = neo4jTemplate.query(sql,
 				params);
 
@@ -235,7 +235,8 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		sqlStringBldr.append(startSql);
 
 		for (int i = 1; i <= requiredRepetitions; i++) {
-			sqlStringBldr.append(String.format(lookupObjectIdentitiesWhereClause, i));
+			sqlStringBldr.append(String.format(
+					lookupObjectIdentitiesWhereClause, i));
 
 			if (i != requiredRepetitions) {
 				sqlStringBldr.append(" OR ");
@@ -244,13 +245,13 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 
 		sqlStringBldr.append(endSql);
 		String sql = sqlStringBldr.toString();
-		
+
 		Map<String, Object> params = new HashMap<String, Object>();
 		int index = 1;
 		for (String id : findNow) {
 			params.put(String.format("aclId%d", index++), id);
 		}
-		
+
 		Result<Map<String, Object>> queryResult = neo4jTemplate.query(sql,
 				params);
 
@@ -400,8 +401,8 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 
 		public Set<String> extractData() {
 			Set<String> parentIdsToLookup = new HashSet<String>(); // Set of
-																// parent_id
-																// Longs
+																	// parent_id
+																	// Longs
 			Iterator<Map<String, Object>> rs = result.iterator();
 			Map<String, Object> data = null;
 			while (rs.hasNext()) {
@@ -419,8 +420,8 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 					}
 
 					// Now try to find it in the cache
-					MutableAcl cached = aclCache
-							.getFromCache(parentId.toString());
+					MutableAcl cached = aclCache.getFromCache(parentId
+							.toString());
 
 					if ((cached == null) || !cached.isSidLoaded(sids)) {
 						parentIdsToLookup.add(parentId.toString());
@@ -463,8 +464,7 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 				if (Boolean.valueOf(rs.get("aclPrincipal").toString())) {
 					owner = new PrincipalSid(rs.get("aclSid").toString());
 				} else {
-					owner = new GrantedAuthoritySid(rs.get("aclSid")
-							.toString());
+					owner = new GrantedAuthoritySid(rs.get("aclSid").toString());
 				}
 
 				acl = new AclImpl(objectIdentity, id, aclAuthorizationStrategy,
@@ -594,7 +594,5 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 	public AclAuthorizationStrategy getAclAuthorizationStrategy() {
 		return aclAuthorizationStrategy;
 	}
-	
-	
 
 }

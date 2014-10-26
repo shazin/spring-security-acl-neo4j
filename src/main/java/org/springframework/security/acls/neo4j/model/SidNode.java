@@ -12,14 +12,15 @@ public class SidNode extends BaseNode {
 
 	@GraphId
 	private Long graphId;
-	
+
 	private Boolean principal = false;
-	
-	@Indexed(indexName = "sid", indexType=IndexType.FULLTEXT)
+
+	@Indexed(indexName = "sid", indexType = IndexType.FULLTEXT)
 	private String sid;
-	
-	public SidNode() {}
-	
+
+	public SidNode() {
+	}
+
 	public SidNode(String sid, Boolean principal) {
 		this();
 		this.principal = principal;
@@ -49,29 +50,30 @@ public class SidNode extends BaseNode {
 	public void setSid(String sid) {
 		this.sid = sid;
 	}
-	
+
 	public boolean equals(Object o) {
-		if(o == null) {
+		if (o == null) {
 			return false;
 		}
-		
-		if(o == this) {
+
+		if (o == this) {
 			return true;
 		}
-		
-		if(o instanceof SidNode) {
+
+		if (o instanceof SidNode) {
 			SidNode other = (SidNode) o;
-			return Objects.equals(getSid(), other.getSid()) && Objects.equals(getPrincipal(), other.getPrincipal());
+			return Objects.equals(getSid(), other.getSid())
+					&& Objects.equals(getPrincipal(), other.getPrincipal());
 		}
-		
+
 		return false;
 	}
-	
+
 	public int hashCode() {
 		return Objects.hash(getSid(), getPrincipal());
 	}
-	
+
 	public String toString() {
-		return "SidNode[id="+getId()+", principal="+getPrincipal()+"]";
+		return "SidNode[id=" + getId() + ", principal=" + getPrincipal() + "]";
 	}
 }

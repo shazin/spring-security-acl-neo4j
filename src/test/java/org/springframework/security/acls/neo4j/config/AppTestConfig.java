@@ -31,66 +31,73 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @ComponentScan(basePackages = { "org.springframework.security.acls.neo4j" })
 public class AppTestConfig extends SpringSecurityNeo4jConfig {
-	
-//	@Bean 
-//	public LookupStrategy lookupStrategy() {
-//		return new BasicLookupStrategy(dataSource(), aclCache(), aclAuthorizationStrategy(), permissionGrantingStrategy());
-//	}
-//	
-//	@Bean
-//	public MutableAclService MutableAclService() {
-//		return new JdbcMutableAclService(dataSource(), lookupStrategy(), aclCache());
-//	}
-	
-	@Bean 
+
+	// @Bean
+	// public LookupStrategy lookupStrategy() {
+	// return new BasicLookupStrategy(dataSource(), aclCache(),
+	// aclAuthorizationStrategy(), permissionGrantingStrategy());
+	// }
+	//
+	// @Bean
+	// public MutableAclService MutableAclService() {
+	// return new JdbcMutableAclService(dataSource(), lookupStrategy(),
+	// aclCache());
+	// }
+
+	@Bean
 	public LookupStrategy lookupStrategy() {
-		return new Neo4jLookupStrategy(graphDatabaseService(), aclCache(), aclAuthorizationStrategy(), permissionGrantingStrategy());	
+		return new Neo4jLookupStrategy(graphDatabaseService(), aclCache(),
+				aclAuthorizationStrategy(), permissionGrantingStrategy());
 	}
-	
+
 	@Bean
 	public MutableAclService mutableAclService() {
-		return new Neo4jMutableAclService(graphDatabaseService(), aclCache(), lookupStrategy());
+		return new Neo4jMutableAclService(graphDatabaseService(), aclCache(),
+				lookupStrategy());
 	}
-	
+
 	@Bean
 	public DataSource dataSource() {
-		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).addScript("META-INF/h2-security-acl-schema.sql").build();
+		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2)
+				.addScript("META-INF/h2-security-acl-schema.sql").build();
 	}
-	
+
 	@Bean
 	public AclAuthorizationStrategy aclAuthorizationStrategy() {
-		return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_SUPER_ADMIN"));
+		return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority(
+				"ROLE_SUPER_ADMIN"));
 	}
-	
+
 	@Bean
 	public PermissionGrantingStrategy permissionGrantingStrategy() {
 		return new DefaultPermissionGrantingStrategy(new ConsoleAuditLogger());
 	}
-	
+
 	@Bean
 	public PermissionFactory permissionFactory() {
 		return new DefaultPermissionFactory();
 	}
-	
+
 	@Bean
 	public EhCacheBasedAclCache aclCache() {
 		return new EhCacheBasedAclCache(ehCacheFactoryBean().getObject());
 	}
-	
-	@Bean 
+
+	@Bean
 	public EhCacheFactoryBean ehCacheFactoryBean() {
 		EhCacheFactoryBean ehCacheFactoryBean = new EhCacheFactoryBean();
-		
-		ehCacheFactoryBean.setCacheManager(new EhCacheManagerFactoryBean().getObject());
+
+		ehCacheFactoryBean.setCacheManager(new EhCacheManagerFactoryBean()
+				.getObject());
 		ehCacheFactoryBean.setCacheName("aclCache");
 		return ehCacheFactoryBean;
 	}
-	
-//	@Bean
-//	public GraphDatabaseService graphDatabaseService() {
-//		return new GraphDatabaseFactory()
-//				.newEmbeddedDatabase("target/spring-security-acl-neo4j-test");
-//	}
+
+	// @Bean
+	// public GraphDatabaseService graphDatabaseService() {
+	// return new GraphDatabaseFactory()
+	// .newEmbeddedDatabase("target/spring-security-acl-neo4j-test");
+	// }
 
 	@Bean
 	public GraphDatabaseService graphDatabaseService() {
@@ -103,7 +110,7 @@ public class AppTestConfig extends SpringSecurityNeo4jConfig {
 				.newGraphDatabase();
 		return db;
 	}
-	
+
 	@Bean
 	public PlatformTransactionManager neo4jTransactionManager()
 			throws Exception {

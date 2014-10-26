@@ -16,18 +16,19 @@ public class SpringSecurityAclTestConfig {
 	public PermissionFactory permissionFactory() {
 		return new DefaultPermissionFactory();
 	}
-	
+
 	@Bean
 	public EhCacheBasedAclCache aclCache() {
 		return new EhCacheBasedAclCache(ehCacheFactoryBean().getObject());
 	}
-	
-	@Bean 
+
+	@Bean
 	public EhCacheFactoryBean ehCacheFactoryBean() {
 		EhCacheFactoryBean ehCacheFactoryBean = new EhCacheFactoryBean();
-		
-		ehCacheFactoryBean.setCacheManager(new EhCacheManagerFactoryBean().getObject());
+
+		ehCacheFactoryBean.setCacheManager(new EhCacheManagerFactoryBean()
+				.getObject());
 		ehCacheFactoryBean.setCacheName("aclCache");
 		return ehCacheFactoryBean;
-	}	
+	}
 }

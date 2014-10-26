@@ -20,7 +20,7 @@ public class AclNode extends BaseNode {
 
 	private Boolean entriesInheriting;
 
-	@Indexed(indexName="object_id_identity", indexType=IndexType.FULLTEXT)
+	@Indexed(indexName = "object_id_identity", indexType = IndexType.FULLTEXT)
 	private Long objectIdIdentity;
 
 	private String parentObject;
@@ -34,8 +34,9 @@ public class AclNode extends BaseNode {
 	@RelatedTo(type = "COMPOSES", direction = Direction.INCOMING)
 	@Fetch
 	private Set<AceNode> aces = new HashSet<AceNode>();
-	
-	public AclNode() {}	
+
+	public AclNode() {
+	}
 
 	public AclNode(Boolean entriesInheriting, Long objectIdIdentity,
 			String parentObject, ClassNode classNode, SidNode ownerSid) {
@@ -93,7 +94,7 @@ public class AclNode extends BaseNode {
 
 	public void setAces(Set<AceNode> aces) {
 		this.aces = aces;
-	}	
+	}
 
 	public Long getGraphId() {
 		return graphId;
@@ -123,16 +124,20 @@ public class AclNode extends BaseNode {
 					&& Objects.equals(getClassNode(), other.getClassNode())
 					&& Objects.equals(getOwnerSid(), other.getOwnerSid());
 		}
-		
+
 		return false;
 	}
-	
+
 	public int hashCode() {
-		return Objects.hash(getObjectIdIdentity(), getEntriesInheriting(), getParentObject(), getClassNode(), getOwnerSid());
+		return Objects.hash(getObjectIdIdentity(), getEntriesInheriting(),
+				getParentObject(), getClassNode(), getOwnerSid());
 	}
-	
+
 	public String toString() {
-		return "AclNode[id="+getId()+", objectIdIdentity="+getObjectIdIdentity()+", entriesInheriting="+getEntriesInheriting()+", parentObject="+getParentObject()+", class="+getClassNode()+"]";
+		return "AclNode[id=" + getId() + ", objectIdIdentity="
+				+ getObjectIdIdentity() + ", entriesInheriting="
+				+ getEntriesInheriting() + ", parentObject="
+				+ getParentObject() + ", class=" + getClassNode() + "]";
 	}
 
 }

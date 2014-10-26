@@ -22,14 +22,15 @@ public class AceNode extends BaseNode {
 	private Boolean auditSuccess = false;
 
 	private Boolean auditFailure = false;
-	
-	@RelatedTo(type = "AUTHORIZES", direction=Direction.OUTGOING)
+
+	@RelatedTo(type = "AUTHORIZES", direction = Direction.OUTGOING)
 	private SidNode entrySid;
-	
-	public AceNode() {}
-	
-	public AceNode(SidNode entrySid, Integer aceOrder, Integer mask, Boolean granting,
-			Boolean auditSuccess, Boolean auditFailure) {
+
+	public AceNode() {
+	}
+
+	public AceNode(SidNode entrySid, Integer aceOrder, Integer mask,
+			Boolean granting, Boolean auditSuccess, Boolean auditFailure) {
 		this();
 		this.entrySid = entrySid;
 		this.aceOrder = aceOrder;
@@ -85,7 +86,7 @@ public class AceNode extends BaseNode {
 
 	public void setAuditFailure(Boolean auditFailure) {
 		this.auditFailure = auditFailure;
-	}	
+	}
 
 	public SidNode getEntrySid() {
 		return entrySid;
@@ -106,23 +107,27 @@ public class AceNode extends BaseNode {
 
 		if (o instanceof AceNode) {
 			AceNode other = (AceNode) o;
-			return Objects.equals(getEntrySid(), other.getEntrySid()) 
+			return Objects.equals(getEntrySid(), other.getEntrySid())
 					&& Objects.equals(getMask(), other.getMask())
 					&& Objects.equals(getAceOrder(), other.getAceOrder())
 					&& Objects.equals(getGranting(), other.getGranting())
-					&& Objects.equals(getAuditSuccess(), other.getAuditSuccess()) 
-					&& Objects.equals(getAuditFailure(), other.getAuditFailure());
+					&& Objects.equals(getAuditSuccess(),
+							other.getAuditSuccess())
+					&& Objects.equals(getAuditFailure(),
+							other.getAuditFailure());
 		}
-		
+
 		return false;
 	}
-	
+
 	public int hashCode() {
-		return Objects.hash(getEntrySid(), getMask(), getAceOrder(), getGranting(), getAuditFailure(), getAuditSuccess());
+		return Objects.hash(getEntrySid(), getMask(), getAceOrder(),
+				getGranting(), getAuditFailure(), getAuditSuccess());
 	}
-	
+
 	public String toString() {
-		return "AceNode[id=" + getId() +",sid="+getEntrySid()+",mask="+getMask()+"]";
+		return "AceNode[id=" + getId() + ",sid=" + getEntrySid() + ",mask="
+				+ getMask() + "]";
 	}
 
 }

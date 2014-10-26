@@ -7,9 +7,9 @@ import org.springframework.data.neo4j.support.index.IndexType;
 
 public class BaseNode {
 
-	@Indexed(indexName="id", indexType=IndexType.FULLTEXT)
+	@Indexed(indexName = "id", indexType = IndexType.FULLTEXT)
 	private final String id;
-	
+
 	public BaseNode() {
 		this.id = UUID.randomUUID().toString();
 	}
@@ -17,30 +17,30 @@ public class BaseNode {
 	public String getId() {
 		return id;
 	}
-	
+
 	public boolean equals(Object o) {
-		if(o == null) {
+		if (o == null) {
 			return false;
 		}
-		
-		if(o == this) {
+
+		if (o == this) {
 			return true;
 		}
-		
-		if(o instanceof BaseNode) {
+
+		if (o instanceof BaseNode) {
 			BaseNode other = (BaseNode) o;
 			return other.getId().equals(getId());
 		}
-		
+
 		return false;
 	}
-	
+
 	public String toString() {
-		return "BaseNode[id="+getId()+"]";
+		return "BaseNode[id=" + getId() + "]";
 	}
-	
+
 	public int hashCode() {
 		return getId().hashCode();
-	}	
-	
+	}
+
 }

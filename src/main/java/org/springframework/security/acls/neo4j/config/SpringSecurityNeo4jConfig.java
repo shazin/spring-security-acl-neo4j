@@ -7,7 +7,7 @@ import org.springframework.data.neo4j.config.Neo4jConfiguration;
 public class SpringSecurityNeo4jConfig extends Neo4jConfiguration {
 
 	public SpringSecurityNeo4jConfig() {
-		setBasePackage("org.springframework.security.acls.neo4j.domain");
+		setBasePackage("org.springframework.security.acls.neo4j.model");
 	}
 	
 	
