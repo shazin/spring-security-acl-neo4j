@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 public class Neo4jLookupStrategy implements LookupStrategy {
 
 	private final String DEFAULT_MATCH_CLAUSE = "MATCH (owner:SidNode)<-[:OWNED_BY]-(acl:AclNode)-[:SECURES]->(class:ClassNode) OPTIONAL MATCH (acl)<-[:COMPOSES]-(ace:AceNode)-[:AUTHORIZES]->(sid:SidNode) WITH acl, ace, owner, sid, class WHERE ( ";
-	private final String DEFAULT_RETURN_CLAUSE = " ) RETURN owner.principal as aclPrincipal, owner.sid as aclSid, acl.objectIdIdentity as objectIdIdentity, ace.aceOrder as aceOrder, acl.id as aclId, acl.parentObject as parentObject, acl.entriesInheriting as entriesInheriting, ace.id as aceId, ace.mask as mask, ace.granting as granting, ace.auditSuccess as auditSuccess, ace.auditFailure as auditFailure, sid.principal as acePrincipal, sid.sid as aceSid, class.className as className ";
+	private final String DEFAULT_RETURN_CLAUSE = " ) RETURN owner.principal AS aclPrincipal, owner.sid AS aclSid, acl.objectIdIdentity AS objectIdIdentity, ace.aceOrder AS aceOrder, acl.id AS aclId, acl.parentObject AS parentObject, acl.entriesInheriting AS entriesInheriting, ace.id AS aceId, ace.mask AS mask, ace.granting AS granting, ace.auditSuccess AS auditSuccess, ace.auditFailure AS auditFailure, sid.principal AS acePrincipal, sid.sid AS aceSid, class.className AS className ";
 	private final String DEFAULT_WHERE_CLAUSE = " (acl.objectIdIdentity = {objectIdIdentity%d} AND class.className = {className%d}) ";
 	private final String DEFAULT_OBJ_ID_LOOKUP_WHERE_CLAUSE = " (acl.id = {aclId%d}) ";
 	private final String DEFAULT_ORDER_BY_CLAUSE = " ORDER BY acl.objectIdIdentity ASC, ace.aceOrder ASC";
@@ -174,7 +174,7 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 			sqlStringBldr.append(String.format(defaultWhereClause, i, i));
 
 			if (i != requiredRepetitions) {
-				sqlStringBldr.append(" or ");
+				sqlStringBldr.append(" OR ");
 			}
 		}
 
@@ -238,7 +238,7 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 			sqlStringBldr.append(String.format(lookupObjectIdentitiesWhereClause, i));
 
 			if (i != requiredRepetitions) {
-				sqlStringBldr.append(" or ");
+				sqlStringBldr.append(" OR ");
 			}
 		}
 

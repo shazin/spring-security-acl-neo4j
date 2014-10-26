@@ -24,10 +24,10 @@ import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.springframework.security.acls.neo4j.domain.AceNode;
-import org.springframework.security.acls.neo4j.domain.AclNode;
-import org.springframework.security.acls.neo4j.domain.ClassNode;
-import org.springframework.security.acls.neo4j.domain.SidNode;
+import org.springframework.security.acls.neo4j.model.AceNode;
+import org.springframework.security.acls.neo4j.model.AclNode;
+import org.springframework.security.acls.neo4j.model.ClassNode;
+import org.springframework.security.acls.neo4j.model.SidNode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
 public class Neo4jMutableAclService extends Neo4jAclService implements MutableAclService {
 
 	//private String insertObjectIdentity = "MATCH (class:ClassNode), (sid:SidNode) WHERE class.className = {className} AND sid.sid = {sid} AND sid.principal = {principal} CREATE (acl:AclNode {objectIdIdentity: {objectIdIdentity}, entriesInheriting: {entriesInheriting}), (acl)-[:SECURES]->(class), (acl)-[:OWNED_BY]"
-	private String selectObjectIdentity = "MATCH (class:ClassNode)<-[:SECURES]-(acl:AclNode) WHERE acl.objectIdIdentity = {objectIdIdentity} and class.className = {className} RETURN acl";
+	private String selectObjectIdentity = "MATCH (class:ClassNode)<-[:SECURES]-(acl:AclNode) WHERE acl.objectIdIdentity = {objectIdIdentity} AND class.className = {className} RETURN acl";
 	private String selectSid = "MATCH (sid:SidNode) WHERE sid.sid = {sid} AND sid.principal = {principal} RETURN sid";
 	private String selectClass = "MATCH (class:ClassNode) WHERE class.className = {className} RETURN class";
 	private String deleteEntryByObjectIdentityForeignKey = "MATCH (acl:AclNode) OPTIONAL MATCH (acl)<-[c:COMPOSES]-(ace:AceNode)-[a:AUTHORIZES]->(sid:SidNode) WHERE acl.id = {aclId} DELETE c, a, ace";
