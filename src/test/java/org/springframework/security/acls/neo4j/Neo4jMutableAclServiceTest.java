@@ -1,6 +1,5 @@
 package org.springframework.security.acls.neo4j;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.FixMethodOrder;
@@ -17,18 +16,22 @@ import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.neo4j.config.AppTestConfig;
+import org.springframework.security.acls.neo4j.config.H2TestConfig;
+import org.springframework.security.acls.neo4j.config.Neo4jTestConfig;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-@ContextConfiguration(classes = { AppTestConfig.class })
+@ContextConfiguration(classes = { AppTestConfig.class, H2TestConfig.class, Neo4jTestConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional(readOnly = true)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@ActiveProfiles(value="dev-neo4j")
 public class Neo4jMutableAclServiceTest {
 
 	@Autowired

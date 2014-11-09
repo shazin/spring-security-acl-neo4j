@@ -23,6 +23,7 @@ public class AclNode extends BaseNode {
 	@Indexed(indexName = "object_id_identity", indexType = IndexType.FULLTEXT)
 	private Long objectIdIdentity;
 
+	@Indexed(indexName = "parent_object", indexType = IndexType.FULLTEXT)
 	private String parentObject;
 
 	@RelatedTo(type = "SECURES", direction = Direction.OUTGOING)

@@ -13,6 +13,7 @@ public class SidNode extends BaseNode {
 	@GraphId
 	private Long graphId;
 
+	@Indexed(indexName = "principal", indexType = IndexType.FULLTEXT)
 	private Boolean principal = false;
 
 	@Indexed(indexName = "sid", indexType = IndexType.FULLTEXT)
