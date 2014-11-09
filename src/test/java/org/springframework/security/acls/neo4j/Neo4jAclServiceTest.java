@@ -173,4 +173,48 @@ public class Neo4jAclServiceTest {
 		assertNotNull(acl);
 		assertEquals(2, acl.getEntries().size());
 	}
+	
+	@Test
+	@Rollback(false)
+	@Transactional(rollbackFor = Exception.class)
+	public void test5readAclsById() {
+		Authentication auth = new TestingAuthenticationToken("shazin", "N/A");
+		auth.setAuthenticated(true);
+		SecurityContextHolder.getContext().setAuthentication(auth);
+
+		List<Sid> sids = Arrays.<Sid> asList(new PrincipalSid("USER_0"),
+				new GrantedAuthoritySid("ROLE_1"));
+		
+		ObjectIdentity parent = new ObjectIdentityImpl("com.test.ShazinParent", 1l);
+
+		List<ObjectIdentity> oids = new ArrayList<ObjectIdentity>();
+		oids.add(parent);		
+		MutableAcl parentAcl = null;
+		for (int i = 1; i <= 100; i++) {
+			ObjectIdentity oid = new ObjectIdentityImpl(String.format(
+					"com.test.ShazinChild%d", i), Long.valueOf(i));
+			oids.add(oid);			
+			MutableAcl acl = mutableAclService.createAcl(oid);
+			if(parentAcl == null) {
+				parentAcl = (MutableAcl) mutableAclService.createAcl(parent);
+			}			
+			acl.setParent(parentAcl);
+			mutableAclService.updateAcl(acl);			
+		}
+		long start = System.nanoTime();
+		Map<ObjectIdentity, Acl> objects = mutableAclService.readAclsById(oids,
+				sids);
+		long end = System.nanoTime();
+
+		System.out.println("Reading " + oids.size() + " objects in "
+				+ (end - start));
+
+		assertEquals(101, objects.size());
+		
+		List<ObjectIdentity> childs = mutableAclService.findChildren(parent);
+		
+		assertEquals(100, childs.size());
+	}
+	
+	
 }

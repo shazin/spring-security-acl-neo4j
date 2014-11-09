@@ -25,8 +25,8 @@ public class Neo4jAclService implements AclService {
 	protected LookupStrategy lookupStrategy;
 	protected AclCache aclCache;
 	protected Neo4jTemplate neo4jTemplate;
-
-	private final String DEFAULT_FIND_CHILDREN = "MATCH (acl:AclNode), (parentAcl:AclNode)-[:SECURES]->(parentClass:ClassNode) WHERE acl.parentObject = parentAcl.id AND parentAcl.objectIdIdentity = {objectIdIdentity} AND parentClass.className = {className} RETURN acl.objectIdIdentity AS aclId, parentClass.className AS className";
+	
+	private final String DEFAULT_FIND_CHILDREN = "MATCH (acl:AclNode)-[:SECURES]->(class:ClassNode) OPTIONAL MATCH (parentAcl:AclNode)-[:SECURES]->(parentClass:ClassNode) WITH parentAcl, parentClass, acl, class WHERE acl.parentObject = parentAcl.id AND parentAcl.objectIdIdentity = {objectIdIdentity} AND parentClass.className = {className} RETURN acl.objectIdIdentity AS aclId, class.className AS className";
 	private String findChildrenSql = DEFAULT_FIND_CHILDREN;
 
 	public Neo4jAclService(GraphDatabaseService graphDatabaseService,
@@ -54,10 +54,6 @@ public class Neo4jAclService implements AclService {
 			data = it.next();
 			objects.add(new ObjectIdentityImpl((String) data.get("className"),
 					(Long) data.get("aclId")));
-		}
-
-		if (objects.size() == 0) {
-			return null;
 		}
 
 		return objects;
