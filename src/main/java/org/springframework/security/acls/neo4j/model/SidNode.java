@@ -7,21 +7,39 @@ import org.springframework.data.neo4j.annotation.Indexed;
 import org.springframework.data.neo4j.annotation.NodeEntity;
 import org.springframework.data.neo4j.support.index.IndexType;
 
+/**
+ * Sid Node representing Sid
+ * 
+ * @author shazin
+ *
+ */
 @NodeEntity
 public class SidNode extends BaseNode {
 
+	// Graph Identifier
 	@GraphId
 	private Long graphId;
 
+	// Principal Flag
 	@Indexed(indexName = "principal", indexType = IndexType.FULLTEXT)
 	private Boolean principal = false;
 
+	// Sid
 	@Indexed(indexName = "sid", indexType = IndexType.FULLTEXT)
 	private String sid;
 
+	/**
+	 * Default Constructor
+	 */
 	public SidNode() {
 	}
 
+	/**
+	 * Conversion Constructor
+	 * 
+	 * @param sid - Sid
+	 * @param principal - Principal Flag
+	 */
 	public SidNode(String sid, Boolean principal) {
 		this();
 		this.principal = principal;

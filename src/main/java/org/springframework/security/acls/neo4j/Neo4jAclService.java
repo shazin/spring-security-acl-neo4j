@@ -20,6 +20,12 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.util.Assert;
 
+/**
+ * Neo4j Implementation of Acl Service
+ * 
+ * @author shazin
+ *
+ */
 public class Neo4jAclService implements AclService {
 
 	protected LookupStrategy lookupStrategy;
@@ -27,8 +33,15 @@ public class Neo4jAclService implements AclService {
 	protected Neo4jTemplate neo4jTemplate;
 	
 	private final String DEFAULT_FIND_CHILDREN = "MATCH (acl:AclNode)-[:SECURES]->(class:ClassNode) OPTIONAL MATCH (parentAcl:AclNode)-[:SECURES]->(parentClass:ClassNode) WITH parentAcl, parentClass, acl, class WHERE acl.parentObject = parentAcl.id AND parentAcl.objectIdIdentity = {objectIdIdentity} AND parentClass.className = {className} RETURN acl.objectIdIdentity AS aclId, class.className AS className";
-	private String findChildrenSql = DEFAULT_FIND_CHILDREN;
+	private String findChildrenCypher = DEFAULT_FIND_CHILDREN;
 
+	/**
+	 * Construct
+	 * 
+	 * @param graphDatabaseService - Graph Database Service
+	 * @param lookupStrategy - Lookup Strategy
+	 * @param aclCache - Acl Cache
+	 */
 	public Neo4jAclService(GraphDatabaseService graphDatabaseService,
 			LookupStrategy lookupStrategy, AclCache aclCache) {
 		Assert.notNull(aclCache, "AclCache can not be null");
@@ -40,6 +53,9 @@ public class Neo4jAclService implements AclService {
 		this.aclCache = aclCache;
 	}
 
+	/**
+	 * Find Children of Object Identity
+	 */
 	@Override
 	public List<ObjectIdentity> findChildren(ObjectIdentity parentIdentity) {
 		List<ObjectIdentity> objects = new ArrayList<ObjectIdentity>();
@@ -47,7 +63,7 @@ public class Neo4jAclService implements AclService {
 		params.put("objectIdIdentity", (Long) parentIdentity.getIdentifier());
 		params.put("className", parentIdentity.getType());
 		Result<Map<String, Object>> result = neo4jTemplate.query(
-				findChildrenSql, params);
+				findChildrenCypher, params);
 		Iterator<Map<String, Object>> it = result.iterator();
 		Map<String, Object> data = null;
 		while (it.hasNext()) {
@@ -59,11 +75,17 @@ public class Neo4jAclService implements AclService {
 		return objects;
 	}
 
+	/**
+	 * Read Acl By Object Identity
+	 */
 	@Override
 	public Acl readAclById(ObjectIdentity object) throws NotFoundException {
 		return readAclById(object, null);
 	}
 
+	/**
+	 * Read Acl By Object Identity and Sids
+	 */
 	@Override
 	public Acl readAclById(ObjectIdentity object, List<Sid> sids)
 			throws NotFoundException {
@@ -75,6 +97,9 @@ public class Neo4jAclService implements AclService {
 		return (Acl) map.get(object);
 	}
 
+	/**
+	 * Read Acls By Object Identities and Sids
+	 */
 	@Override
 	public Map<ObjectIdentity, Acl> readAclsById(List<ObjectIdentity> objects,
 			List<Sid> sids) throws NotFoundException {
@@ -94,42 +119,85 @@ public class Neo4jAclService implements AclService {
 		return result;
 	}
 
+	/**
+	 * Read Acls By Object Identities
+	 */
 	@Override
 	public Map<ObjectIdentity, Acl> readAclsById(List<ObjectIdentity> objects)
 			throws NotFoundException {
 		return readAclsById(objects, null);
 	}
 
+	/**
+	 * Get Lookup Strategy
+	 * 
+	 * @return lookupStrategy
+	 */
 	public LookupStrategy getLookupStrategy() {
 		return lookupStrategy;
 	}
 
+	/**
+	 * Set Lookup Strategy
+	 * 
+	 * @param lookupStrategy
+	 */
 	public void setLookupStrategy(LookupStrategy lookupStrategy) {
 		this.lookupStrategy = lookupStrategy;
 	}
 
+	/**
+	 * Get Acl Cache
+	 * 
+	 * @return aclCache
+	 */
 	public AclCache getAclCache() {
 		return aclCache;
 	}
 
+	/**
+	 * Set Acl Cache
+	 * 
+	 * @param aclCache
+	 */
 	public void setAclCache(AclCache aclCache) {
 		this.aclCache = aclCache;
 	}
 
+	/**
+	 * Get Neo4j Template
+	 * 
+	 * @return neo4jTemplate
+	 */
 	public Neo4jTemplate getNeo4jTemplate() {
 		return neo4jTemplate;
 	}
 
+	/**
+	 * Set Neo4j Template
+	 * 
+	 * @param neo4jTemplate
+	 */
 	public void setNeo4jTemplate(Neo4jTemplate neo4jTemplate) {
 		this.neo4jTemplate = neo4jTemplate;
 	}
 
-	public String getFindChildrenSql() {
-		return findChildrenSql;
+	/**
+	 * Get Find Children Cypher
+	 * 
+	 * @return findChildrenCypher
+	 */
+	public String getFindChildrenCypher() {
+		return findChildrenCypher;
 	}
 
-	public void setFindChildrenSql(String findChildrenSql) {
-		this.findChildrenSql = findChildrenSql;
+	/**
+	 * Set Find Children Cypher
+	 * 
+	 * @param findChildrenCypher
+	 */
+	public void setFindChildrenCypher(String findChildrenCypher) {
+		this.findChildrenCypher = findChildrenCypher;
 	}
 
 }

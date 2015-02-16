@@ -12,33 +12,58 @@ import org.springframework.data.neo4j.annotation.NodeEntity;
 import org.springframework.data.neo4j.annotation.RelatedTo;
 import org.springframework.data.neo4j.support.index.IndexType;
 
+/**
+ * Acl Node to represent Object Identity
+ * 
+ * @author shazin
+ *
+ */
 @NodeEntity
 public class AclNode extends BaseNode {
 
+	// Graph Identifier
 	@GraphId
 	private Long graphId;
 
+	// Entries Inheriting
 	private Boolean entriesInheriting;
 
+	// Object Id Identity
 	@Indexed(indexName = "object_id_identity", indexType = IndexType.FULLTEXT)
 	private Long objectIdIdentity;
 
+	// Parent Object
 	@Indexed(indexName = "parent_object", indexType = IndexType.FULLTEXT)
 	private String parentObject;
 
+	// Securing Class Node
 	@RelatedTo(type = "SECURES", direction = Direction.OUTGOING)
 	private ClassNode classNode;
 
+	// Owning Sid
 	@RelatedTo(type = "OWNED_BY", direction = Direction.OUTGOING)
 	private SidNode ownerSid;
 
+	// Aces which composes this Acl
 	@RelatedTo(type = "COMPOSES", direction = Direction.INCOMING)
 	@Fetch
 	private Set<AceNode> aces = new HashSet<AceNode>();
 
+	/**
+	 * Default Constructor
+	 */
 	public AclNode() {
 	}
-
+	
+	/**
+	 * Conversion Constructor
+	 * 
+	 * @param entriesInheriting - Entries Inheriting Flag
+	 * @param objectIdIdentity - Object Id Identity
+	 * @param parentObject - Parent Object
+	 * @param classNode - Class Node
+	 * @param ownerSid - Owner Sid
+	 */
 	public AclNode(Boolean entriesInheriting, Long objectIdIdentity,
 			String parentObject, ClassNode classNode, SidNode ownerSid) {
 		this();

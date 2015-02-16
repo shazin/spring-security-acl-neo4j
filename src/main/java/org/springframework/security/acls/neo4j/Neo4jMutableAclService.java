@@ -34,23 +34,37 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
+/**
+ * Neo4j based Mutable Acl Service Implementation
+ * 
+ * @author shazin
+ *
+ */
 @Transactional(readOnly = true)
 public class Neo4jMutableAclService extends Neo4jAclService implements
 		MutableAclService {
 
-	// private String insertObjectIdentity =
-	// "MATCH (class:ClassNode), (sid:SidNode) WHERE class.className = {className} AND sid.sid = {sid} AND sid.principal = {principal} CREATE (acl:AclNode {objectIdIdentity: {objectIdIdentity}, entriesInheriting: {entriesInheriting}), (acl)-[:SECURES]->(class), (acl)-[:OWNED_BY]"
 	private String selectObjectIdentity = "MATCH (class:ClassNode)<-[:SECURES]-(acl:AclNode) WHERE acl.objectIdIdentity = {objectIdIdentity} AND class.className = {className} RETURN acl";
 	private String selectSid = "MATCH (sid:SidNode) WHERE sid.sid = {sid} AND sid.principal = {principal} RETURN sid";
 	private String selectClass = "MATCH (class:ClassNode) WHERE class.className = {className} RETURN class";
-	private String deleteEntryByObjectIdentityForeignKey = "MATCH (acl:AclNode) OPTIONAL MATCH (acl)<-[c:COMPOSES]-(ace:AceNode)-[a:AUTHORIZES]->(sid:SidNode) WHERE acl.id = {aclId} DELETE c, a, ace";
-	private String deleteObjectIdentityByPrimaryKey = "MATCH (owner:SidNode)<-[o:OWNED_BY]-(acl:AclNode)-[s:SECURES]->(class:ClassNode) WHERE acl.id = {aclId} DELETE s, o, acl";
+	private String deleteEntryByObjectIdentityId = "MATCH (acl:AclNode) OPTIONAL MATCH (acl)<-[c:COMPOSES]-(ace:AceNode)-[a:AUTHORIZES]->(sid:SidNode) WHERE acl.id = {aclId} DELETE c, a, ace";
+	private String deleteObjectIdentityByObjectIdentityId = "MATCH (owner:SidNode)<-[o:OWNED_BY]-(acl:AclNode)-[s:SECURES]->(class:ClassNode) WHERE acl.id = {aclId} DELETE s, o, acl";
 
+	/**
+	 * Constructor
+	 * 
+	 * @param graphDatabaseService - Graph Database Service
+	 * @param aclCache - Acl Cache
+	 * @param lookupStrategy - Lookup Strategy
+	 */
 	public Neo4jMutableAclService(GraphDatabaseService graphDatabaseService,
 			AclCache aclCache, LookupStrategy lookupStrategy) {
 		super(graphDatabaseService, lookupStrategy, aclCache);
 	}
 
+	/**
+	 * Create Acl
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public MutableAcl createAcl(ObjectIdentity objectIdentity)
@@ -58,7 +72,7 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		Assert.notNull(objectIdentity, "Object Identity required");
 
 		// Check this object identity hasn't already been persisted
-		if (retrieveObjectIdentityPrimaryKey(objectIdentity) != null) {
+		if (retrieveObjectIdentityId(objectIdentity) != null) {
 			throw new AlreadyExistsException("Object identity '"
 					+ objectIdentity + "' already exists");
 		}
@@ -81,6 +95,9 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		return (MutableAcl) acl;
 	}
 
+	/**
+	 * Delete Acl
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteAcl(ObjectIdentity objectIdentity, boolean deleteChildren)
@@ -98,7 +115,7 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 			}
 		}
 
-		String oidPrimaryKey = retrieveObjectIdentityPrimaryKey(objectIdentity);
+		String oidPrimaryKey = retrieveObjectIdentityId(objectIdentity);
 
 		// Delete this ACL's ACEs in the acl_entry table
 		deleteEntries(oidPrimaryKey);
@@ -110,6 +127,9 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		aclCache.evictFromCache(objectIdentity);
 	}
 
+	/**
+	 * Update Acl
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public MutableAcl updateAcl(MutableAcl acl) throws NotFoundException {
@@ -117,7 +137,7 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 				"Object Identity doesn't provide an identifier");
 
 		// Delete this ACL's ACEs in the acl_entry table
-		deleteEntries(retrieveObjectIdentityPrimaryKey(acl.getObjectIdentity()));
+		deleteEntries(retrieveObjectIdentityId(acl.getObjectIdentity()));
 
 		// Create this ACL's ACEs in the acl_entry table
 		createEntries(acl);
@@ -133,7 +153,13 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		return (MutableAcl) super.readAclById(acl.getObjectIdentity());
 	}
 
-	protected String retrieveObjectIdentityPrimaryKey(ObjectIdentity oid) {
+	/**
+	 * Retrieve Object Identity Id
+	 * 
+	 * @param oid - Object Identity
+	 * @return Id
+	 */
+	protected String retrieveObjectIdentityId(ObjectIdentity oid) {
 		try {
 			AclNode acl = retrieveAclNode(oid);
 			if (acl == null) {
@@ -146,6 +172,12 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		}
 	}
 
+	/**
+	 * Retrieve Acl Node
+	 * 
+	 * @param oid - Object Identity
+	 * @return Acl Node
+	 */
 	private AclNode retrieveAclNode(ObjectIdentity oid) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("objectIdIdentity", (Long) oid.getIdentifier());
@@ -157,6 +189,12 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		return acl;
 	}
 
+	/**
+	 * Create Object Identity
+	 * 
+	 * @param object - Object Identity
+	 * @param owner - Owner Sid
+	 */
 	protected void createObjectIdentity(ObjectIdentity object, Sid owner) {
 		Assert.isTrue(
 				TransactionSynchronizationManager.isSynchronizationActive(),
@@ -168,6 +206,13 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		AclNode savedAcl = neo4jTemplate.save(aclNode);
 	}
 
+	/**
+	 * Create or Retrieve Sid
+	 * 
+	 * @param sid - Sid
+	 * @param allowCreate - Allow Create Flag
+	 * @return Sid Node
+	 */
 	protected SidNode createOrRetrieveSid(Sid sid, boolean allowCreate) {
 		Assert.notNull(sid, "Sid required");
 
@@ -204,6 +249,13 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		return null;
 	}
 
+	/**
+	 * Create of Retrieve Class
+	 * 
+	 * @param type - Class Type
+	 * @param allowCreate - Allow Create Flag
+	 * @return Class Node
+	 */
 	protected ClassNode createOrRetrieveClass(String type, boolean allowCreate) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("className", type);
@@ -224,18 +276,33 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		return null;
 	}
 
-	protected void deleteEntries(String oidPrimaryKey) {
+	/**
+	 * Delete Entries by Object Identity Id
+	 * 
+	 * @param objectIdentityId
+	 */
+	protected void deleteEntries(String objectIdentityId) {
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("aclId", oidPrimaryKey);
-		neo4jTemplate.query(deleteEntryByObjectIdentityForeignKey, params);
+		params.put("aclId", objectIdentityId);
+		neo4jTemplate.query(deleteEntryByObjectIdentityId, params);
 	}
 
-	protected void deleteObjectIdentity(String oidPrimaryKey) {
+	/**
+	 * Delete Object Identity by Object Identity Id
+	 * 
+	 * @param objectIdentityId
+	 */
+	protected void deleteObjectIdentity(String objectIdentityId) {
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("aclId", oidPrimaryKey);
-		neo4jTemplate.query(deleteObjectIdentityByPrimaryKey, params);
+		params.put("aclId", objectIdentityId);
+		neo4jTemplate.query(deleteObjectIdentityByObjectIdentityId, params);
 	}
 
+	/**
+	 * Create Entries for Acl
+	 * 
+	 * @param acl
+	 */
 	protected void createEntries(final MutableAcl acl) {
 		if (acl.getEntries().isEmpty()) {
 			return;
@@ -258,6 +325,11 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		AclNode savedAclNode = neo4jTemplate.save(aclNode);
 	}
 
+	/**
+	 * Update Object Identity
+	 * 
+	 * @param acl
+	 */
 	protected void updateObjectIdentity(MutableAcl acl) {
 		String parentId = null;
 
@@ -268,7 +340,7 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 
 			ObjectIdentityImpl oii = (ObjectIdentityImpl) acl.getParentAcl()
 					.getObjectIdentity();
-			parentId = retrieveObjectIdentityPrimaryKey(oii);
+			parentId = retrieveObjectIdentityId(oii);
 		}
 
 		Assert.notNull(acl.getOwner(),
@@ -288,6 +360,11 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		neo4jTemplate.save(aclNode);
 	}
 
+	/**
+	 * Clear Cache including Children
+	 * 
+	 * @param objectIdentity
+	 */
 	private void clearCacheIncludingChildren(ObjectIdentity objectIdentity) {
 		Assert.notNull(objectIdentity, "ObjectIdentity required");
 		List<ObjectIdentity> children = findChildren(objectIdentity);
@@ -299,46 +376,96 @@ public class Neo4jMutableAclService extends Neo4jAclService implements
 		aclCache.evictFromCache(objectIdentity);
 	}
 
+	/**
+	 * Get Select Object Identity Cypher
+	 * 
+	 * @return selectObjectIdentity
+	 */
 	public String getSelectObjectIdentity() {
 		return selectObjectIdentity;
 	}
 
+	/**
+	 * Set Select Object Identity Cypher
+	 * 
+	 * @param selectObjectIdentity
+	 */
 	public void setSelectObjectIdentity(String selectObjectIdentity) {
 		this.selectObjectIdentity = selectObjectIdentity;
 	}
 
+	/**
+	 * Get Select Sid Cypher
+	 * 
+	 * @return selectSid
+	 */
 	public String getSelectSid() {
 		return selectSid;
 	}
 
+	/**
+	 * Set Select Sid Cypher
+	 * 
+	 * @param selectSid
+	 */
 	public void setSelectSid(String selectSid) {
 		this.selectSid = selectSid;
 	}
 
+	/**
+	 * Get Select Class Cypher
+	 * 
+	 * @return selectClass
+	 */
 	public String getSelectClass() {
 		return selectClass;
 	}
 
+	/**
+	 * Set Select Class Cypher
+	 * 
+	 * @param selectClass
+	 */
 	public void setSelectClass(String selectClass) {
 		this.selectClass = selectClass;
 	}
 
-	public String getDeleteEntryByObjectIdentityForeignKey() {
-		return deleteEntryByObjectIdentityForeignKey;
+	/**
+	 * Get Delete Object Entry By Object Identity Id Cypher
+	 * 
+	 * @return deleteEntryByObjectIdentityId
+	 */
+	public String getDeleteEntryByObjectIdentityId() {
+		return deleteEntryByObjectIdentityId;
 	}
 
-	public void setDeleteEntryByObjectIdentityForeignKey(
-			String deleteEntryByObjectIdentityForeignKey) {
-		this.deleteEntryByObjectIdentityForeignKey = deleteEntryByObjectIdentityForeignKey;
+	/**
+	 * Set Delete Object Entry By Object Identity Id Cypher
+	 * 
+	 * @param deleteEntryByObjectIdentityId
+	 */
+	public void setDeleteEntryByObjectIdentityId(
+			String deleteEntryByObjectIdentityId) {
+		this.deleteEntryByObjectIdentityId = deleteEntryByObjectIdentityId;
 	}
 
-	public String getDeleteObjectIdentityByPrimaryKey() {
-		return deleteObjectIdentityByPrimaryKey;
+	/**
+	 * Get Delete Object Identity By Object Identity Id
+	 * 
+	 * @return deleteObjectIdentityByObjectIdentityId
+	 */
+	public String getDeleteObjectIdentityByObjectIdentityId() {
+		return deleteObjectIdentityByObjectIdentityId;
 	}
 
-	public void setDeleteObjectIdentityByPrimaryKey(
-			String deleteObjectIdentityByPrimaryKey) {
-		this.deleteObjectIdentityByPrimaryKey = deleteObjectIdentityByPrimaryKey;
+	/**
+	 * Set Delete Object Identity By Object Identity Id
+	 * 
+	 * @param deleteObjectIdentityByObjectIdentityId
+	 */
+	public void setDeleteObjectIdentityByObjectIdentityId(
+			String deleteObjectIdentityByObjectIdentityId) {
+		this.deleteObjectIdentityByObjectIdentityId = deleteObjectIdentityByObjectIdentityId;
 	}
 
 }

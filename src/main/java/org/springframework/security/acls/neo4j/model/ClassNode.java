@@ -7,18 +7,34 @@ import org.springframework.data.neo4j.annotation.Indexed;
 import org.springframework.data.neo4j.annotation.NodeEntity;
 import org.springframework.data.neo4j.support.index.IndexType;
 
+/**
+ * Class Node to represent Class
+ * 
+ * @author shazin
+ *
+ */
 @NodeEntity
 public class ClassNode extends BaseNode {
 
+	// Graph Identifier
 	@GraphId
 	private Long graphId;
 
+	// Class Name
 	@Indexed(indexName = "class_name", indexType = IndexType.FULLTEXT)
 	private String className;
 
+	/**
+	 * Default Constructor
+	 */
 	public ClassNode() {
 	}
 
+	/**
+	 * Conversion Constructor
+	 * 
+	 * @param className
+	 */
 	public ClassNode(String className) {
 		this();
 		this.className = className;

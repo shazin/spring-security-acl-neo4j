@@ -36,6 +36,12 @@ import org.springframework.security.acls.model.UnloadedSidException;
 import org.springframework.security.util.FieldUtils;
 import org.springframework.util.Assert;
 
+/**
+ * Neo4j based Implementation of Lookup Strategy
+ * 
+ * @author shazin
+ *
+ */
 public class Neo4jLookupStrategy implements LookupStrategy {
 
 	private final String DEFAULT_MATCH_CLAUSE = "MATCH (owner:SidNode)<-[:OWNED_BY]-(acl:AclNode)-[:SECURES]->(class:ClassNode) OPTIONAL MATCH (acl)<-[:COMPOSES]-(ace:AceNode)-[:AUTHORIZES]->(sid:SidNode) WITH acl, ace, owner, sid, class WHERE ( ";
@@ -60,6 +66,14 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 	private final Field fieldAcl = FieldUtils.getField(
 			AccessControlEntryImpl.class, "acl");
 
+	/**
+	 * Constructor
+	 * 
+	 * @param graphDatabaseService - Graph Database Service
+	 * @param aclCache - Acl Cache
+	 * @param aclAuthorizationStrategy - Acl Authorization Strategy
+	 * @param permissionGrantingStrategy - Permission Granting Strategy
+	 */
 	public Neo4jLookupStrategy(GraphDatabaseService graphDatabaseService,
 			AclCache aclCache,
 			AclAuthorizationStrategy aclAuthorizationStrategy,
@@ -77,6 +91,9 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		fieldAcl.setAccessible(true);
 	}
 
+	/**
+	 * Read Acls By Identities and Sids
+	 */
 	@Override
 	public Map<ObjectIdentity, Acl> readAclsById(List<ObjectIdentity> objects,
 			List<Sid> sids) {
@@ -149,6 +166,13 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		return result;
 	}
 
+	/**
+	 * Lookup Object Identities
+	 * 
+	 * @param objectIdentities - Object Identities
+	 * @param sids - Sids
+	 * @return Object Identity Acl Map
+	 */
 	private Map<ObjectIdentity, Acl> lookupObjectIdentities(
 			final Collection<ObjectIdentity> objectIdentities, List<Sid> sids) {
 		Assert.notEmpty(objectIdentities, "Must provide identities to lookup");
@@ -217,6 +241,13 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		return resultMap;
 	}
 
+	/**
+	 * Lookup Primary Keys
+	 * 
+	 * @param acls - Acls
+	 * @param findNow - Find now Acls
+	 * @param sids - Sids
+	 */
 	private void lookupPrimaryKeys(final Map<Serializable, Acl> acls,
 			final Set<String> findNow, final List<Sid> sids) {
 		Assert.notNull(acls, "ACLs are required");
@@ -265,6 +296,13 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		}
 	}
 
+	/**
+	 * Convert data to Acl
+	 * 
+	 * @param inputMap - Input Data map
+	 * @param currentIdentity - Current Identity
+	 * @return acl 
+	 */
 	private AclImpl convert(Map<Serializable, Acl> inputMap,
 			String currentIdentity) {
 		Assert.notEmpty(inputMap, "InputMap required");
@@ -316,6 +354,12 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		return result;
 	}
 
+	/**
+	 * Stub Acl Parent
+	 * 
+	 * @author shazin
+	 *
+	 */
 	private class StubAclParent implements Acl {
 		private final String id;
 
@@ -358,6 +402,12 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		}
 	}
 
+	/**
+	 * Read Aces from Acl
+	 * 
+	 * @param acl - Acl
+	 * @return List of Aces
+	 */
 	@SuppressWarnings("unchecked")
 	private List<AccessControlEntryImpl> readAces(AclImpl acl) {
 		try {
@@ -368,6 +418,12 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		}
 	}
 
+	/**
+	 * Set Acl on Ace
+	 * 
+	 * @param ace - Access Control Entry
+	 * @param acl - Access Control List
+	 */
 	private void setAclOnAce(AccessControlEntryImpl ace, AclImpl acl) {
 		try {
 			fieldAcl.set(ace, acl);
@@ -378,6 +434,12 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		}
 	}
 
+	/**
+	 * Set Aces for Acl
+	 * 
+	 * @param acl - Access Control List
+	 * @param aces - Access Control Entries
+	 */
 	private void setAces(AclImpl acl, List<AccessControlEntryImpl> aces) {
 		try {
 			fieldAces.set(acl, aces);
@@ -386,6 +448,12 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		}
 	}
 
+	/**
+	 * Process Result 
+	 * 
+	 * @author shazin
+	 *
+	 */
 	private class ProcessResult {
 		private final Map<Serializable, Acl> acls;
 		private final List<Sid> sids;
@@ -513,84 +581,184 @@ public class Neo4jLookupStrategy implements LookupStrategy {
 		}
 	}
 
+	/**
+	 * Get Permission Factory
+	 * 
+	 * @return permissionFactory
+	 */
 	public PermissionFactory getPermissionFactory() {
 		return permissionFactory;
 	}
 
+	/**
+	 * Set Permission Factory
+	 * 
+	 * @param permissionFactory
+	 */
 	public void setPermissionFactory(PermissionFactory permissionFactory) {
 		this.permissionFactory = permissionFactory;
 	}
 
+	/**
+	 * Get Permission Granting Strategy
+	 * 
+	 * @return permissionGrantingStrategy
+	 */
 	public PermissionGrantingStrategy getPermissionGrantingStrategy() {
 		return permissionGrantingStrategy;
 	}
 
+	/**
+	 * Set Permission Granting Strategy
+	 * 
+	 * @param permissionGrantingStrategy
+	 */
 	public void setPermissionGrantingStrategy(
 			PermissionGrantingStrategy permissionGrantingStrategy) {
 		this.permissionGrantingStrategy = permissionGrantingStrategy;
 	}
 
+	/**
+	 * Get Neo4j Template
+	 * 
+	 * @return neo4jTemplate
+	 */
 	public Neo4jTemplate getNeo4jTemplate() {
 		return neo4jTemplate;
 	}
 
+	/**
+	 * Set Neo4j Template
+	 * 
+	 * @param neo4jTemplate
+	 */
 	public void setNeo4jTemplate(Neo4jTemplate neo4jTemplate) {
 		this.neo4jTemplate = neo4jTemplate;
 	}
 
+	/**
+	 * Get Batch Size
+	 * 
+	 * @return batchSize
+	 */
 	public int getBatchSize() {
 		return batchSize;
 	}
 
+	/**
+	 * Set Batch Size
+	 * 
+	 * @param batchSize
+	 */
 	public void setBatchSize(int batchSize) {
 		this.batchSize = batchSize;
 	}
 
+	/**
+	 * Get Lookup Object Identities Where Clause
+	 * 
+	 * @return lookupObjectIdentitiesWhereClause
+	 */
 	public String getLookupObjectIdentitiesWhereClause() {
 		return lookupObjectIdentitiesWhereClause;
 	}
 
+	/**
+	 * Set Lookup Object Identities Where Clause
+	 * 
+	 * @param lookupObjectIdentitiesWhereClause
+	 */
 	public void setLookupObjectIdentitiesWhereClause(
 			String lookupObjectIdentitiesWhereClause) {
 		this.lookupObjectIdentitiesWhereClause = lookupObjectIdentitiesWhereClause;
 	}
 
+	/**
+	 * Get Default Where Clause
+	 * 
+	 * @return defaultWhereClause
+	 */
 	public String getDefaultWhereClause() {
 		return defaultWhereClause;
 	}
 
+	/**
+	 * Set Default Where Clause
+	 * 
+	 * @param defaultWhereClause
+	 */
 	public void setDefaultWhereClause(String defaultWhereClause) {
 		this.defaultWhereClause = defaultWhereClause;
 	}
 
+	/**
+	 * Get Match Clause
+	 * 
+	 * @return matchClause
+	 */
 	public String getMatchClause() {
 		return matchClause;
 	}
 
+	/**
+	 * Set Match Clause
+	 * 
+	 * @param matchClause
+	 */
 	public void setMatchClause(String matchClause) {
 		this.matchClause = matchClause;
 	}
 
+	/**
+	 * Get Order by Clause
+	 * 
+	 * @return orderByClause
+	 */
 	public String getOrderByClause() {
 		return orderByClause;
 	}
 
+	/**
+	 * Set Order by Clause
+	 * 
+	 * @param orderByClause
+	 */
 	public void setOrderByClause(String orderByClause) {
 		this.orderByClause = orderByClause;
 	}
 
+	/**
+	 * Get Return Clause
+	 * 
+	 * @return returnClause
+	 */
 	public String getReturnClause() {
 		return returnClause;
 	}
 
+	/**
+	 * Set Return Clause
+	 * 
+	 * @param returnClause
+	 */
 	public void setReturnClause(String returnClause) {
 		this.returnClause = returnClause;
 	}
 
+	/**
+	 * Get Acl Cache
+	 * 
+	 * @return aclCache
+	 */
 	public AclCache getAclCache() {
 		return aclCache;
 	}
 
+	/**
+	 * Get Acl Authorization Strategy
+	 * 
+	 * @return aclAuthorizationStrategy
+	 */
 	public AclAuthorizationStrategy getAclAuthorizationStrategy() {
 		return aclAuthorizationStrategy;
 	}

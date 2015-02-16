@@ -7,28 +7,54 @@ import org.springframework.data.neo4j.annotation.GraphId;
 import org.springframework.data.neo4j.annotation.NodeEntity;
 import org.springframework.data.neo4j.annotation.RelatedTo;
 
+/**
+ * Ace Node to Represent Access Control Entry
+ * 
+ * @author shazin
+ *
+ */
 @NodeEntity
 public class AceNode extends BaseNode {
 
+	// Graph Identifier
 	@GraphId
 	private Long graphId;
 
+	// Ace Order
 	private Integer aceOrder = 0;
 
+	// Mask (Permission)
 	private Integer mask = 0;
 
+	// Granting or Non granting
 	private Boolean granting = false;
 
+	// Audit Success
 	private Boolean auditSuccess = false;
 
+	// Audit Failure
 	private Boolean auditFailure = false;
 
+	// Entry Sid 
 	@RelatedTo(type = "AUTHORIZES", direction = Direction.OUTGOING)
 	private SidNode entrySid;
 
+	/**
+	 * Default Contructor
+	 */
 	public AceNode() {
 	}
 
+	/**
+	 * Conversion Constructor
+	 * 
+	 * @param entrySid - Entry Sid
+	 * @param aceOrder - Ace Order
+	 * @param mask - Mask
+	 * @param granting - Granting Flag
+	 * @param auditSuccess - Audit Success Flag
+	 * @param auditFailure - Audit Failure Flag
+	 */
 	public AceNode(SidNode entrySid, Integer aceOrder, Integer mask,
 			Boolean granting, Boolean auditSuccess, Boolean auditFailure) {
 		this();

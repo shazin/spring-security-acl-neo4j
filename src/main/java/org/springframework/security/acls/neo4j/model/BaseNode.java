@@ -5,11 +5,21 @@ import java.util.UUID;
 import org.springframework.data.neo4j.annotation.Indexed;
 import org.springframework.data.neo4j.support.index.IndexType;
 
-public class BaseNode {
+/**
+ * Abstract Base Nodes
+ * 
+ * @author shazin
+ *
+ */
+public abstract class BaseNode {
 
+	// Unique Identifier of Domain Objects
 	@Indexed(indexName = "id", indexType = IndexType.FULLTEXT)
 	private final String id;
 
+	/**
+	 * Default Constructor
+	 */
 	public BaseNode() {
 		this.id = UUID.randomUUID().toString();
 	}
